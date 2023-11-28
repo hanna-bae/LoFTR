@@ -2,11 +2,14 @@ import os
 import math
 from collections import abc
 from loguru import logger
+import torch 
 from torch.utils.data.dataset import Dataset
 from tqdm import tqdm
 from os import path as osp
 from pathlib import Path
 from joblib import Parallel, delayed
+from torch.utils.data import TensorDataset
+
 
 import pytorch_lightning as pl
 from torch import distributed as dist
@@ -19,13 +22,35 @@ from torch.utils.data import (
     dataloader
 )
 
-from src.utils.augment import build_augmentor
-from src.utils.dataloader import get_local_split
-from src.utils.misc import tqdm_joblib
-from src.utils import comm
-from src.datasets.megadepth import MegaDepthDataset
-from src.datasets.scannet import ScanNetDataset
-from src.datasets.sampler import RandomConcatSampler
+from LoFTR.src.utils.augment import build_augmentor
+from LoFTR.src.utils.dataloader import get_local_split
+from LoFTR.src.utils.misc import tqdm_joblib
+from LoFTR.src.utils import comm
+from LoFTR.src.datasets.megadepth import MegaDepthDataset
+from LoFTR.src.datasets.scannet import ScanNetDataset
+from LoFTR.src.datasets.sampler import RandomConcatSampler
+
+class DummyDataModule(pl.LightningDataModule):
+    def __init__(self, args, config, batch_size=1):
+        super().__init__()
+        self.batch_size = batch_size
+
+    def setup(self, stage=None):
+        dummy_input1 = torch.randn(self.batch_size, 3, 240, 240)
+        dummy_input2 = torch.randn(self.batch_size, 3, 240, 240)
+
+        self.train_dataset = TensorDataset(dummy_input1, dummy_input2)
+        self.val_dataset = TensorDataset(dummy_input1, dummy_input2)
+        self.test_dataset = TensorDataset(dummy_input1, dummy_input2)
+
+    def train_dataloader(self):
+        return DataLoader(self.train_dataset, batch_size=self.batch_size)
+
+    def val_dataloader(self):
+        return DataLoader(self.val_dataset, batch_size=self.batch_size)
+
+    def test_dataloader(self):
+        return DataLoader(self.test_dataset, batch_size=self.batch_size)
 
 
 class MultiSceneDataModule(pl.LightningDataModule):

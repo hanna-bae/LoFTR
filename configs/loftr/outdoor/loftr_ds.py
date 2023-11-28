@@ -1,4 +1,4 @@
-from src.config.default import _CN as cfg
+from LoFTR.src.config.default import _CN as cfg
 
 cfg.LOFTR.MATCH_COARSE.MATCH_TYPE = 'dual_softmax'
 

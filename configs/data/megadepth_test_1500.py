@@ -1,4 +1,4 @@
-from configs.data.base import cfg
+from LoFTR.configs.data.base import cfg
 
 TEST_BASE_PATH = "assets/megadepth_test_1500_scene_info"
 
